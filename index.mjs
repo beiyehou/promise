@@ -15,6 +15,11 @@ p.then(res => {
 
 p.then(res => {
     console.log('2nd:' + res);
+    return new Cpromise((resolve) => {
+        resolve('2nd 1st then return promise.');
+    });
+}).then(res => {
+    console.log('2nd 2nd then res:', res);
 });
 
 console.log('end');

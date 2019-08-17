@@ -1,6 +1,42 @@
 const _isFun = Symbol('isFun');
 const _isEmpty = Symbol('isEmpty');
 
+/**
+ * Tools 
+ * */
+function isPromise(suspicious) {
+    return suspicious instanceof Cpromise;
+}
+
+function handlePromiseResult(x, deferred) {
+    x.then((val) => {
+        deferred.resolve(val);
+    }, (res) => {
+        deferred.reject(res);
+    });
+}
+
+function handleonFullFilled(value, onFullFilled, deferred) {
+    let x = onFullFilled(value);
+    if (isPromise(x)) {
+        handlePromiseResult(x, deferred);
+    } else {
+        deferred.resolve(x);
+    }
+}
+
+function handleonRejected(reason, onRejected, deferred) {
+    let r = onRejected(reason);
+    if (isPromise(r)) {
+        handlePromiseResult(r, deferred);
+    } else {
+        deferred.reject(r);
+    }
+}
+
+/**
+ * Main constructor function 
+ */
 function Cpromise(executor) {
     const self = this;
     self.status = 'pending';
@@ -49,24 +85,20 @@ Cpromise.prototype.then = function(onFullFilled, onRejected) {
     const self = this;
     const deferred = new CpromiseDeferred();
     if (self.status === 'resolved' && self[_isFun](onFullFilled)) {
-        let x = onFullFilled(self.value);
-        deferred.resolve(x);
+        handleonFullFilled(self.value, onFullFilled, deferred);
     }
     if (self.status === 'rejected' && self[_isFun](onRejected)) {
-        let r = onRejected(self.reason);
-        deferred.reject(r);
+        handleonRejected(self.reason, onRejected, deferred);
     }
     if (self.status === 'pending') {
         if (self[_isFun](onFullFilled)) {
             self.resolveQuene.push((value) => {
-                let x = onFullFilled(value);
-                deferred.resolve(x);
+                handleonFullFilled(value, onFullFilled, deferred);
             });
         }
         if (self[_isFun](onRejected)) {
             self.rejectQuene.push((reason) => {
-                let r = onRejected(reason);
-                deferred.reject(r);
+                handleonRejected(reason, onRejected, deferred);
             });
         }  
     }  
