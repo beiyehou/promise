@@ -1,11 +1,16 @@
-const _isFun = Symbol('isFun');
-const _isEmpty = Symbol('isEmpty');
-
 /**
  * Tools 
  * */
 function isPromise(suspicious) {
     return suspicious instanceof Cpromise;
+}
+
+function isEmpty(arr) {
+    return !arr || (arr.length == 0);
+}
+
+function isFun(fun) {
+    return typeof fun === 'function';
 }
 
 function handlePromiseResult(x, deferred) {
@@ -17,7 +22,7 @@ function handlePromiseResult(x, deferred) {
 }
 
 function handleonFullFilled(value, onFullFilled, deferred) {
-    let x = onFullFilled(value);
+    let x = isFun(onFullFilled) ? onFullFilled(value) : value;
     if (isPromise(x)) {
         handlePromiseResult(x, deferred);
     } else {
@@ -26,7 +31,7 @@ function handleonFullFilled(value, onFullFilled, deferred) {
 }
 
 function handleonRejected(reason, onRejected, deferred) {
-    let r = onRejected(reason);
+    let r = isFun(onRejected) ? onRejected(reason) : reason;
     if (isPromise(r)) {
         handlePromiseResult(r, deferred);
     } else {
@@ -48,7 +53,7 @@ function Cpromise(executor) {
         if (self.status === 'pending') {
             self.value = value;
             self.status = 'resolved';            
-            if (!self[_isEmpty](self.resolveQuene)) {
+            if (!isEmpty(self.resolveQuene)) {
                 self.resolveQuene.forEach((itemFun) => {
                     itemFun(value);
                 });
@@ -60,7 +65,7 @@ function Cpromise(executor) {
         if (self.status === 'pending') {
             self.reason = reason;
             self.status = 'rejected';
-            if (!self[_isEmpty](self.rejectQuene)) {
+            if (!isEmpty(self.rejectQuene)) {
                 self.rejectQuene.forEach((itemFun) => {
                     itemFun(reason);
                 });
@@ -84,34 +89,26 @@ function CpromiseDeferred() {
 Cpromise.prototype.then = function(onFullFilled, onRejected) {
     const self = this;
     const deferred = new CpromiseDeferred();
-    if (self.status === 'resolved' && self[_isFun](onFullFilled)) {
+    if (self.status === 'resolved') {
         handleonFullFilled(self.value, onFullFilled, deferred);
     }
-    if (self.status === 'rejected' && self[_isFun](onRejected)) {
+    if (self.status === 'rejected') {
         handleonRejected(self.reason, onRejected, deferred);
     }
     if (self.status === 'pending') {
-        if (self[_isFun](onFullFilled)) {
-            self.resolveQuene.push((value) => {
-                handleonFullFilled(value, onFullFilled, deferred);
-            });
-        }
-        if (self[_isFun](onRejected)) {
-            self.rejectQuene.push((reason) => {
-                handleonRejected(reason, onRejected, deferred);
-            });
-        }  
+        self.resolveQuene.push((value) => {
+            handleonFullFilled(value, onFullFilled, deferred);
+        });        
+        self.rejectQuene.push((reason) => {
+            handleonRejected(reason, onRejected, deferred);
+        });         
     }  
 
     return deferred.cpromise;
 }
 
-Cpromise.prototype[_isEmpty] = function(arr) {
-    return !arr || (arr.length == 0);
-}
-
-Cpromise.prototype[_isFun] = function(fun) {
-    return typeof fun === 'function';
+Cpromise.prototype.catch = function(onRejected) {
+    return this.then(undefined, onRejected);
 }
 
 export default Cpromise;
