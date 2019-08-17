@@ -29,4 +29,14 @@ p.then(res => {
 //     console.log('3rd reject:' + err);
 // }); 
 
+Cpromise.all([new Cpromise((resolve) => {
+    resolve('promise all 1st one resolve');
+}), new Cpromise((resolve) => {
+    resolve('promise all 2nd one resolve');
+})]).then(res => {
+    console.log("promise all resolve: ", res);
+}).catch(err => {
+    console.log("promise all reject: ", err);
+});
+
 console.log('end');

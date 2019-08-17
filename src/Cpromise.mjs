@@ -123,4 +123,25 @@ Cpromise.prototype.catch = function(onRejected) {
     return this.then(undefined, onRejected);
 }
 
+Cpromise.all = function(cpromises) {
+    let deferred = new CpromiseDeferred();
+    let results = [];
+    if (cpromises.length === 0) {
+        deferred.resolve(results);
+    } else {
+        const { length } = cpromises;
+        for (let i = 0; i < length; i++) {
+            cpromises[i].then(res => {
+                results.push(res);
+                if (results.length === length) {
+                    deferred.resolve(results);
+                }
+            }, (reason) => {
+                deferred.reject(reason);
+            });
+        }
+    }
+    return deferred.cpromise;
+}
+
 export default Cpromise;
