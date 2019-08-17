@@ -35,7 +35,11 @@ function handleonRejected(reason, onRejected, deferred) {
     if (isPromise(r)) {
         handlePromiseResult(r, deferred);
     } else {
-        deferred.reject(r);
+        if (isFun(onRejected)) {
+            deferred.resolve(r);
+        } else {
+            deferred.reject(r);
+        }
     }
 }
 
