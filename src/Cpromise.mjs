@@ -54,8 +54,10 @@ function Cpromise(executor) {
             self.value = value;
             self.status = 'resolved';            
             if (!isEmpty(self.resolveQuene)) {
-                self.resolveQuene.forEach((itemFun) => {
-                    itemFun(value);
+                setTimeout(() => {
+                    self.resolveQuene.forEach((itemFun) => {
+                        itemFun(value);
+                    });
                 });
             }
         }
@@ -66,8 +68,10 @@ function Cpromise(executor) {
             self.reason = reason;
             self.status = 'rejected';
             if (!isEmpty(self.rejectQuene)) {
-                self.rejectQuene.forEach((itemFun) => {
-                    itemFun(reason);
+                setTimeout(() => {
+                    self.rejectQuene.forEach((itemFun) => {
+                        itemFun(reason);
+                    });
                 });
             }
         }
@@ -90,10 +94,14 @@ Cpromise.prototype.then = function(onFullFilled, onRejected) {
     const self = this;
     const deferred = new CpromiseDeferred();
     if (self.status === 'resolved') {
-        handleonFullFilled(self.value, onFullFilled, deferred);
+        setTimeout(() => {
+            handleonFullFilled(self.value, onFullFilled, deferred);
+        });
     }
     if (self.status === 'rejected') {
-        handleonRejected(self.reason, onRejected, deferred);
+        setTimeout(() => {
+            handleonRejected(self.reason, onRejected, deferred);
+        });
     }
     if (self.status === 'pending') {
         self.resolveQuene.push((value) => {

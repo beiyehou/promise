@@ -1,27 +1,22 @@
 import Cpromise from './src/Cpromise.mjs';
 
-let p = new Cpromise((resolve, reject) => {
-    setTimeout(() => {
-        resolve('async timeout');
-    });
+const p = new Cpromise((resolve, reject) => {
+    // resolve("constructor");
+    reject('error');
 });
 
 p.then(res => {
-    console.log('1st:' + res);
-    return res;
-}).then(res => {
-    console.log('1st 2nd then:', res);
-});
-
-p.then(res => {
-    console.log('2nd:' + res);
-    return new Cpromise((resolve, reject) => {
-        reject('2nd 1st then return promise.');
-    });
-}).then(res => {
-    console.log('2nd 2nd then res:', res);
+    console.log('1st resolve:' + res);
 }).catch(err => {
-    console.log('2nd 1st catch err:', err);
+    console.log('1st reject:' + err);
+    return '1st 2nd catch return';
+}).then(res => {
+    console.log('1st 2nd then resolve:', res);
 });
+
+
+p.catch(err => {
+    console.log('3rd reject:' + err);
+}); 
 
 console.log('end');
