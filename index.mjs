@@ -1,8 +1,8 @@
 import Cpromise from './src/Cpromise.mjs';
 
 const p = new Cpromise((resolve, reject) => {
-    // resolve("constructor");
-    reject('error');
+    resolve("constructor");
+    // reject('error');
 });
 
 p.then(res => {
@@ -16,7 +16,9 @@ p.then(res => {
 
 
 p.catch(err => {
-    console.log('3rd reject:' + err);
+    console.log('2nd reject:' + err);
+}).then(res => {
+    console.log('2nd then:', res);
 }); 
 
 console.log('end');
